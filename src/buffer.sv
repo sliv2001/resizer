@@ -15,7 +15,8 @@ module buffer #(
 	output reg underflow=1
 );
 
-reg [7:0] waddr=0, raddr=0, n_waddr=0, n_raddr=0;
+reg [7:0] waddr=0, raddr=0;
+reg [7:0] n_waddr=0, n_raddr=0;
 wire [BUF_OUT_ENTRY_SZ-1:0] dout;
 
 /*memory_block # (.S_KEEP_WIDTH(3), .T_DATA_WIDTH(1), .M_KEEP_WIDTH(2),
@@ -67,7 +68,7 @@ begin
 	begin
 		if (!(n_raddr-n_waddr<=BUF_IN_ENTRY_SZ && waddr<raddr))
 			overflow=0;
-		if (n_waddr-n_raddr<=BUF_OUT_ENTRY_SZ && waddr>raddr)
+		if (n_waddr-n_raddr<=BUF_OUT_ENTRY_SZ && waddr>=raddr && waddr!=0)
 			underflow=1;
 	end;
 	
@@ -86,6 +87,10 @@ begin
 		waddr<=0;
 		raddr<=0;
 	end
+end
+
+initial begin
+	$monitor("raddr %d; waddr %d", raddr, waddr);
 end
 
 endmodule

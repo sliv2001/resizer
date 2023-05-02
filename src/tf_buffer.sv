@@ -33,6 +33,12 @@ begin
 	slave_entry_valid=1;
 	master_entry_ready=1;
 	slave_entry=9'b101100111;
+	#199;
+	master_entry_ready=0;
+	#205;
+	slave_entry_valid=0;
+	#208;
+	master_entry_ready=1;
 end
 
 endmodule
