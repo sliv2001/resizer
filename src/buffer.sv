@@ -1,10 +1,10 @@
 module buffer #(
 	parameter	S_KEEP_WIDTH = 3,
-			T_DATA_WIDTH = 1,
-			M_KEEP_WIDTH = 2,
-			BUF_IN_ENTRY_SZ = (2 + T_DATA_WIDTH)* S_KEEP_WIDTH,
-			BUF_OUT_ENTRY_SZ = (2 + T_DATA_WIDTH)* M_KEEP_WIDTH,
-			MULTIPLIER=2
+					T_DATA_WIDTH = 1,
+					M_KEEP_WIDTH = 2,
+					BUF_IN_ENTRY_SZ = (2 + T_DATA_WIDTH)* S_KEEP_WIDTH,
+					BUF_OUT_ENTRY_SZ = (2 + T_DATA_WIDTH)* M_KEEP_WIDTH,
+					MULTIPLIER=2
 )(
 	input clk,
 	input slave_entry_valid,
@@ -15,6 +15,8 @@ module buffer #(
 	output reg underflow=1
 );
 
+reg underflowReg=1;
+reg prevUnderflowReg=1;
 reg [7:0] waddr=0, raddr=0;
 reg [7:0] n_waddr=0, n_raddr=0;
 wire [BUF_OUT_ENTRY_SZ-1:0] dout;
@@ -44,7 +46,7 @@ begin
 		if (n_waddr>=BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*MULTIPLIER)
 			n_waddr=0;
 	end
-	if (master_entry_ready && !underflow)
+	if (master_entry_ready && !underflowReg)
 	begin
 		if (n_raddr>=BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*MULTIPLIER)
 			n_raddr=0;
@@ -60,20 +62,20 @@ begin
 		
 	if (slave_entry_valid && !overflow)
 	begin
-		underflow=0;
+		underflowReg=0;
 		if (n_raddr-n_waddr<=BUF_IN_ENTRY_SZ && waddr<raddr)
 			overflow=1;
 	end
-	if (master_entry_ready && !underflow)
+	if (master_entry_ready && !underflowReg)
 	begin
 		if (!(n_raddr-n_waddr<=BUF_IN_ENTRY_SZ && waddr<raddr))
 			overflow=0;
 		if (n_waddr-n_raddr<=BUF_OUT_ENTRY_SZ && waddr>=raddr && waddr!=0)
-			underflow=1;
+			underflowReg=1;
 	end;
 	
 
-	if (!underflow)
+	if (!underflowReg)
 	begin
 		if (slave_entry_valid && !overflow)
 			waddr<=n_waddr;
@@ -83,10 +85,14 @@ begin
 	else
 	begin
 		overflow=0;
-		underflow=1;
+		underflowReg=1;
 		waddr<=0;
 		raddr<=0;
 	end
+	
+	prevUnderflowReg<=underflowReg;
+	
+	underflow=prevUnderflowReg||underflowReg;
 end
 
 initial begin

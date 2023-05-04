@@ -40,6 +40,13 @@ begin
 	#4;
 	underflow=1;
 	master_entry=6'b110000;
+	#8;
+	underflow=0;
+	master_entry=6'b101101;
+	#4;
+	master_entry=6'b011001;
+	#4;
+	underflow=1;
 end
 
 endmodule
