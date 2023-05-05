@@ -46,7 +46,7 @@ d0(
 	.s_keep_i(s_keep_i),
 	.s_data_i(s_data_i),
 	.s_ready_o(s_ready_o),
-	.en(overflow),
+	.en(~overflow),
 	.slave_entry_valid(slave_entry_valid),
 	.slave_entry(slave_entry)
 );

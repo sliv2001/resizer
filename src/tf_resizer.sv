@@ -1,8 +1,8 @@
 module tf_resizer;
 
-parameter	S_KEEP_WIDTH = 2,
+parameter	S_KEEP_WIDTH = 3,
 				T_DATA_WIDTH = 4,
-				M_KEEP_WIDTH = 3,
+				M_KEEP_WIDTH = 2,
 				BUF_IN_ENTRY_SZ = (2 + T_DATA_WIDTH)* S_KEEP_WIDTH,
 				BUF_OUT_ENTRY_SZ = (2 + T_DATA_WIDTH)* M_KEEP_WIDTH,
 				MULTIPLIER=2;
@@ -63,11 +63,11 @@ begin
 	#99;
 	s_valid_i=1;
 	s_last_i=0;
-	s_keep_i=2'b11;
+	s_keep_i=3'b111;
 	s_data_i[0]=1;
 	s_data_i[1]=0;
-	/*s_data_i[2]=1;
-	s_data_i[3]=0;
+	s_data_i[2]=1;
+	/*s_data_i[3]=0;
 	s_data_i[4]=1;
 	s_data_i[5]=0;
 	s_data_i[6]=1;*/
@@ -78,8 +78,8 @@ begin
 	s_last_i=0;
 	s_data_i[0]=1;
 	s_data_i[1]=0;
-	/*s_data_i[2]=1;
-	s_data_i[3]=2;
+	s_data_i[2]=1;
+	/*s_data_i[3]=2;
 	s_data_i[4]=3;
 	s_data_i[5]=4;
 	s_data_i[6]=5;*/
@@ -87,8 +87,8 @@ begin
 	#4;
 	s_data_i[0]=6;
 	s_data_i[1]=7;
-	/*s_data_i[2]=8;
-	s_data_i[3]=9;
+	s_data_i[2]=8;
+	/*s_data_i[3]=9;
 	s_data_i[4]=10;
 	s_data_i[5]=11;
 	s_data_i[6]=12;*/
@@ -96,8 +96,8 @@ begin
 	#4;
 	s_data_i[0]=13;
 	s_data_i[1]=14;
-	/*s_data_i[2]=15;
-	s_data_i[3]=0;
+	s_data_i[2]=15;
+	/*s_data_i[3]=0;
 	s_data_i[4]=1;
 	s_data_i[5]=2;
 	s_data_i[6]=3;*/
@@ -105,8 +105,8 @@ begin
 	#4;
 	s_data_i[0]=4;
 	s_data_i[1]=5;
-	/*s_data_i[2]=6;
-	s_data_i[3]=7;
+	s_data_i[2]=6;
+	/*s_data_i[3]=7;
 	s_data_i[4]=8;
 	s_data_i[5]=9;
 	s_data_i[6]=10;*/
