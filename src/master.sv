@@ -16,7 +16,7 @@ module master#(
 );
 
 reg prev_underflow=1;
-reg [M_KEEP_WIDTH-1:0] lasts=0, keep, keepResult;
+reg [M_KEEP_WIDTH-1:0] lasts=0, keep, keepResult, prevKeepResult;
 reg repetitive=0;
 integer i, j;
 
@@ -33,12 +33,14 @@ begin
 	if (lasts!=0)
 	begin
 		if (repetitive && lasts[0]==0)
-			keepResult=(lasts-1)&keep;
+			keepResult= ~prevKeepResult;
 		else 
-			keepResult=(~(lasts-1))&keep;
+			keepResult=((lasts-1)|lasts)&keep;
 	end
 	else
 		keepResult=keep;
+	
+	prevKeepResult=keepResult;
 	
 end
 
