@@ -31,6 +31,20 @@ wire [BUF_IN_ENTRY_SZ-1:0] slave_entry;
 wire master_entry_ready;
 wire [BUF_OUT_ENTRY_SZ-1:0] master_entry;
 
+logic reset=1;
+int vect=0;
+
+/*Test data*/
+localparam TEST_LEN = 3+S_KEEP_WIDTH*(1+T_DATA_WIDTH)  +  3+M_KEEP_WIDTH*(1+T_DATA_WIDTH)+1;
+logic [TEST_LEN-1:0] tv [0:1000];
+
+reg m_valid_o_exp;
+reg m_last_o_exp;
+reg s_ready_o_exp;
+reg [M_KEEP_WIDTH-1:0] m_keep_o_exp;
+reg [T_DATA_WIDTH-1:0] m_data_o_exp [M_KEEP_WIDTH];
+reg care=1;
+
 resizer #(.S_KEEP_WIDTH(S_KEEP_WIDTH), .T_DATA_WIDTH(T_DATA_WIDTH), .M_KEEP_WIDTH(M_KEEP_WIDTH))
 rs(
 	.clk(clk),
@@ -60,59 +74,39 @@ end
 
 initial
 begin
-	#99;
-	s_valid_i=1;
-	s_last_i=0;
-	s_keep_i=3'b111;
-	s_data_i[0]=1;
-	s_data_i[1]=0;
-	s_data_i[2]=1;
-	/*s_data_i[3]=0;
-	s_data_i[4]=1;
-	s_data_i[5]=0;
-	s_data_i[6]=1;*/
-	#4;
-	s_last_i=1;
-	s_valid_i=0;
-	#16;
-	s_last_i=0;
-	s_data_i[0]=1;
-	s_data_i[1]=0;
-	s_data_i[2]=1;
-	/*s_data_i[3]=2;
-	s_data_i[4]=3;
-	s_data_i[5]=4;
-	s_data_i[6]=5;*/
-	s_valid_i=1;
-	#4;
-	s_data_i[0]=6;
-	s_data_i[1]=7;
-	s_data_i[2]=8;
-	/*s_data_i[3]=9;
-	s_data_i[4]=10;
-	s_data_i[5]=11;
-	s_data_i[6]=12;*/
-	s_last_i=1;
-	#4;
-	s_data_i[0]=13;
-	s_data_i[1]=14;
-	s_data_i[2]=15;
-	/*s_data_i[3]=0;
-	s_data_i[4]=1;
-	s_data_i[5]=2;
-	s_data_i[6]=3;*/
-	s_last_i=1;
-	#4;
-	s_data_i[0]=4;
-	s_data_i[1]=5;
-	s_data_i[2]=6;
-	/*s_data_i[3]=7;
-	s_data_i[4]=8;
-	s_data_i[5]=9;
-	s_data_i[6]=10;*/
-	s_last_i=1;
-	#4;
-	s_valid_i=0;
+	$readmemb("../test/normal.tv", tv);
+	#11;
+	reset=0;
+end
+
+always @(negedge clk)
+begin
+
+	if (!reset)
+	begin
+
+		{care, s_valid_i, s_last_i, s_keep_i, s_data_i[0], s_data_i[1], s_data_i[2],
+			m_ready_i, s_ready_o_exp, m_valid_o_exp, m_last_o_exp, 
+			m_keep_o_exp, m_data_o_exp[0], m_data_o_exp[1]} = tv[vect];
+
+		#1;
+		
+		if (care &&
+			s_ready_o != s_ready_o_exp ||
+			m_valid_o != m_valid_o_exp ||
+			m_last_o != m_last_o_exp	||
+			m_keep_o != m_keep_o_exp	||
+			m_data_o != m_data_o_exp)
+		begin
+			$error("Error at time %0t", $time);
+		end
+		vect = vect+1;
+		if (tv[vect] === {TEST_LEN'('bx)}) 
+		begin
+			$display("%3d tests completed", vect);
+			$stop;
+		end
+	end
 end
 
 endmodule
