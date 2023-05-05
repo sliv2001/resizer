@@ -32,15 +32,13 @@ begin
 	
 	if (lasts!=0)
 	begin
-		if (repetitive && lasts[0]==0)
+		if (repetitive)
 			keepResult= ~prevKeepResult;
 		else 
 			keepResult=((lasts-1)|lasts)&keep;
 	end
 	else
 		keepResult=keep;
-	
-	prevKeepResult=keepResult;
 	
 end
 
@@ -53,7 +51,7 @@ begin
 	
 	if (lasts!=0  && lasts[M_KEEP_WIDTH-1]==0)
 	begin
-		if (!underflow)
+		if (!underflow && !repetitive)
 		begin
 			repetitive<=1;
 		end
@@ -65,7 +63,8 @@ begin
 	
 	m_keep_o<=keepResult;
 	m_valid_o <= !(underflow & prev_underflow) & keepResult!=0;
-	m_last_o <= lasts>0;
+	m_last_o <= repetitive?0:lasts>0;
+	prevKeepResult<=keepResult;
 end
 
 endmodule

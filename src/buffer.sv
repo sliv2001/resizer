@@ -21,19 +21,6 @@ reg [7:0] waddr=0, raddr=0;
 reg [7:0] n_waddr=0, n_raddr=0;
 wire [BUF_OUT_ENTRY_SZ-1:0] dout;
 
-/*memory_block # (.S_KEEP_WIDTH(3), .T_DATA_WIDTH(1), .M_KEEP_WIDTH(2),
-					.BUF_IN_ENTRY_SZ((2 + T_DATA_WIDTH)* S_KEEP_WIDTH),
-					.BUF_OUT_ENTRY_SZ ((2 + T_DATA_WIDTH)* M_KEEP_WIDTH),
-					.MULTIPLIER(MULTIPLIER)
-) mem (
-	.dout(dout), 
-	.din(slave_entry), 
-	.clk(clk),
-	.en(slave_entry_valid & ~overflow), 
-	.wptr(waddr),
-	.rptr(raddr)
-);*/
-
 reg [BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*2-1:0] storage=0;
 
 always @*
@@ -55,8 +42,9 @@ end
 
 always @(posedge clk)
 begin
-
-	master_entry = storage[raddr+BUF_OUT_ENTRY_SZ-1 -: BUF_OUT_ENTRY_SZ];
+	if (master_entry_ready)
+		master_entry = storage[raddr+BUF_OUT_ENTRY_SZ-1 -: BUF_OUT_ENTRY_SZ];
+	
 	if (slave_entry_valid & ~overflow)
 		storage[waddr+BUF_IN_ENTRY_SZ-1 -: BUF_IN_ENTRY_SZ] = slave_entry;
 		
