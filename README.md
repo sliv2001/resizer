@@ -1,5 +1,19 @@
 # Resizer project
 
+## How to build
+
+You should set paths to your installation folders of Quartus and Modelsim beforehand.
+
+To synthesize the project, use:
+```bash
+$ ./synthesize.sh
+```
+
+To simulate the project, similarly:
+```bash
+$ ./simulate.sh
+```
+
 ## Steps of implementation
 
 ### Planning 
