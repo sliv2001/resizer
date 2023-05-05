@@ -1,4 +1,4 @@
-module tf_resizer;
+module tf_resizer_0;
 
 parameter	S_KEEP_WIDTH = 3,
 				T_DATA_WIDTH = 4,
