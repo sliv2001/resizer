@@ -66,7 +66,7 @@ begin
 	if (!underflowReg)
 	begin
 		if (slave_entry_valid && !overflow)
-			waddr<=n_waddr;
+			waddr<= (M_KEEP_WIDTH>=S_KEEP_WIDTH)? 0: n_waddr;
 		if (master_entry_ready)
 			raddr<=(waddr!=raddr)? n_raddr: 0;
 	end
@@ -80,7 +80,7 @@ begin
 	
 	prevUnderflowReg<=underflowReg;
 	
-	underflow=prevUnderflowReg||underflowReg;
+	underflow=M_KEEP_WIDTH>S_KEEP_WIDTH? 1: prevUnderflowReg||underflowReg;
 end
 
 initial begin
