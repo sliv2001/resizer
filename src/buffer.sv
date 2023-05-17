@@ -1,3 +1,7 @@
+// почему размер буфера пропорционален BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*?
+//      а если размер данных будет, к примеру, 32 бита? в таком случае мы получим огромный буфер
+//
+
 module buffer #(
 	parameter	S_KEEP_WIDTH = 3,
 					T_DATA_WIDTH = 1,
@@ -6,22 +10,24 @@ module buffer #(
 					BUF_OUT_ENTRY_SZ = (2 + T_DATA_WIDTH)* M_KEEP_WIDTH,
 					MULTIPLIER=2
 )(
+	// а какой тип данных у входных значений?
 	input clk,
-	input slave_entry_valid,
+	input slave_entry_valid, 
 	input [BUF_IN_ENTRY_SZ-1:0] slave_entry,
 	input master_entry_ready,
 	output reg [BUF_OUT_ENTRY_SZ-1:0] master_entry,
-	output reg overflow=0,
+	output reg overflow=0, // почему синтаксис (= ...) для выходного порта?
 	output reg underflow=1
 );
 
+// почему регистры объявляются и сразу определяются через такой синтаксис (= ...)? как это соотносится с аппаратной реализацией (в железе)?  
 reg underflowReg=1;
 reg prevUnderflowReg=1;
-reg [7:0] waddr=0, raddr=0;
+reg [7:0] waddr=0, raddr=0; // ширина 8 бит — почему?
 reg [7:0] n_waddr=0, n_raddr=0;
 wire [BUF_OUT_ENTRY_SZ-1:0] dout;
 
-reg [BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*2-1:0] storage=0;
+reg [BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*2-1:0] storage=0; // MULTIPLIER?
 
 always @*
 begin
@@ -48,11 +54,11 @@ begin
 	if (slave_entry_valid & ~overflow)
 		storage[waddr+BUF_IN_ENTRY_SZ-1 -: BUF_IN_ENTRY_SZ] = slave_entry;
 		
-	if (slave_entry_valid && !overflow)
+	if (slave_entry_valid && !overflow) // почему "!" (а выше "~")?
 	begin
 		underflowReg=0;
 		if (n_raddr-n_waddr<=BUF_IN_ENTRY_SZ && waddr<raddr)
-			overflow=1;
+			overflow=1; // overflow использует в своей логики присванивания "!overflow" — петля зависимости?
 	end
 	if (master_entry_ready && !underflowReg)
 	begin
@@ -72,7 +78,7 @@ begin
 	end
 	else
 	begin
-		overflow=0;
+		overflow=0; // у нас блок чувствительный на posedge clk, а здесь блокирующее присваивание
 		underflowReg=1;
 		waddr<=0;
 		raddr<=0;
