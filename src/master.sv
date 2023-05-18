@@ -30,7 +30,7 @@ begin
 		keep[i] = master_entry[i*(2 + T_DATA_WIDTH)];
 	end
 	
-	if (lasts!=0)
+	if (lasts!=0) // может быть несколько lasts в одном такте? нельзя улучшить данную подсхему сравнения?
 	begin
 		if (repetitive)
 			keepResult= ~prevKeepResult;
@@ -53,12 +53,12 @@ begin
 	begin
 		if (!underflow && !repetitive)
 		begin
-			repetitive<=1;
+			repetitive<=1; // а если "repetitive==1" и "lasts!=0  && lasts[M_KEEP_WIDTH-1]==0" ветки сработают в один такт? что будет писаться в repetitive? я вижу, что во второй ветке в логике есть "!repetitive", но это неявное понимание перекладывается на плечи умного(!) компилятора/синтезатора
 		end
 	end
-	for (j=0; j<M_KEEP_WIDTH; j=j+1)
+	for (j=0; j<M_KEEP_WIDTH; j=j+1) // не генвар (многие тулы смогут разобраться, но не все)
 	begin : genr 
-		m_data_o[j] <= master_entry[j*(2 + T_DATA_WIDTH)+1+T_DATA_WIDTH -: T_DATA_WIDTH];
+		m_data_o[j] <= master_entry[j*(2 + T_DATA_WIDTH)+1+T_DATA_WIDTH -: T_DATA_WIDTH]; // точно по выборке битов правильно? 
 	end
 	
 	m_keep_o<=keepResult;
