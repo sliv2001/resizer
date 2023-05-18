@@ -36,8 +36,9 @@ begin
 	n_raddr = raddr+BUF_OUT_ENTRY_SZ;
 	if (slave_entry_valid && !overflow)
 	begin
-		if (n_waddr>=BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*MULTIPLIER)
-			n_waddr=0;
+		// возможно ли, что n_waddr станет больше BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*MULTIPLIER (не по алгоритму, а по реализации)?
+		if (n_waddr>=BUF_IN_ENTRY_SZ*BUF_OUT_ENTRY_SZ*MULTIPLIER) // глубина (критический путь) такого сравнения? 
+			n_waddr=0; // это регистр? зависит комбинационно от себя "if (n_waddr ...)"
 	end
 	if (master_entry_ready && !underflowReg)
 	begin
@@ -54,7 +55,7 @@ begin
 	if (slave_entry_valid & ~overflow)
 		storage[waddr+BUF_IN_ENTRY_SZ-1 -: BUF_IN_ENTRY_SZ] = slave_entry;
 		
-	if (slave_entry_valid && !overflow) // почему "!" (а выше "~")?
+	if (slave_entry_valid && !overflow) // почему "!" (а выше "~")? почему "&&" (а выше "&")?
 	begin
 		underflowReg=0;
 		if (n_raddr-n_waddr<=BUF_IN_ENTRY_SZ && waddr<raddr)
@@ -65,21 +66,21 @@ begin
 		if (!(n_raddr-n_waddr<=BUF_IN_ENTRY_SZ && waddr<raddr))
 			overflow=0;
 		if (n_waddr-n_raddr<=BUF_OUT_ENTRY_SZ && waddr>=raddr && waddr!=0)
-			underflowReg=1;
+			underflowReg=1; // зависит от "!underflowReg" комибинационно? (-//-)
 	end;
 	
 
 	if (!underflowReg)
 	begin
 		if (slave_entry_valid && !overflow)
-			waddr<= (M_KEEP_WIDTH>=S_KEEP_WIDTH)? 0: n_waddr;
+			waddr<= (M_KEEP_WIDTH>=S_KEEP_WIDTH)? 0: n_waddr; // если будут два пакета на запись подряд и master не готов принимать? указатель не сдивнется и перепишет данные?
 		if (master_entry_ready)
-			raddr<=(waddr!=raddr)? n_raddr: 0;
+			raddr<=(waddr!=raddr)? n_raddr: 0; // если waddr полностью заполнит буфер и сделает полный оборот, но начальная точка (где raddr стоит) — не на нуле, не сбросится указатель чтения в ноль, потеряв прошлую позицию?
 	end
 	else
 	begin
 		overflow=0; // у нас блок чувствительный на posedge clk, а здесь блокирующее присваивание
-		underflowReg=1;
+		underflowReg=1; // это регистр? почему "="?
 		waddr<=0;
 		raddr<=0;
 	end
